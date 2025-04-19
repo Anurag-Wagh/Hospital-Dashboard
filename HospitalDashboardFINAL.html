@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: url('https://img.freepik.com/free-photo/medical-banner-with-doctor-holding-stethoscope_23-2149611240.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e88e5, #1565c0);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            margin-bottom: 20px;
+        }
+
+        .datetime {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+            font-size: 1.1em;
+            backdrop-filter: blur(10px);
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card, .doctors-list, .modal-content {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card {
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: 600;
+            color: #1e88e5;
+            margin: 8px 0;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .action-button {
+            background: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-button:hover {
+            background: #1e88e5;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            padding: 15px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 450px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 0.9em;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            min-height: 60px;
+            font-size: 0.9em;
+        }
+
+        .modal h2 {
+            margin-bottom: 12px;
+            font-size: 1.2em;
+        }
+
+        .doctors-list {
+            padding: 8px;
+            border-radius: 8px;
+            margin-top: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-height: calc(100vh - 450px);
+            overflow-y: auto;
+        }
+
+        .doctors-list h2 {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #1565c0;
+        }
+
+        .doctors-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 8px;
+            padding: 4px 6px;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.9em;
+            border-bottom: 2px solid #1e88e5;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .doctor-card {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 8px;
+            padding: 4px 6px;
+            margin: 2px 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 4px;
+            align-items: center;
+            cursor: context-menu;
+            transition: background-color 0.2s;
+        }
+
+        .doctor-card:hover {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .doctor-info h3 {
+            font-size: 0.95em;
+            margin: 0;
+            color: #333;
+        }
+
+        .doctor-qualification {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 1px;
+        }
+
+        .visiting-hours {
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.85em;
+            color: #444;
+        }
+
+        .patient-count {
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .count-control {
+            cursor: pointer;
+            background: #f0f0f0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            user-select: none;
+            transition: background-color 0.2s;
+            font-size: 0.85em;
+        }
+
+        .count-number {
+            min-width: 70px;
+            text-align: right;
+            font-size: 0.85em;
+            color: #444;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 10px;
+            background: #e9ecef;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #1e88e5, #1565c0);
+            transition: width 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close-button {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+
+        .context-menu {
+            display: none;
+            position: fixed;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            padding: 5px 0;
+            z-index: 1000;
+        }
+
+        .context-menu-item {
+            padding: 8px 15px;
+            cursor: pointer;
+            color: #333;
+            font-size: 0.9em;
+        }
+
+        .context-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .time-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .time-picker {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time-input {
+            width: 50px;
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .time-separator {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .ampm-select {
+            padding: 4px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            background: white;
+        }
+
+        .time-range-text {
+            font-size: 0.9em;
+            color: #666;
+            margin: 0 5px;
+        }
+
+        .token-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 2px;
+        }
+
+        .token-number {
+            font-size: 0.8em;
+            color: #1e88e5;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .token-control {
+            cursor: pointer;
+            background: #e3f2fd;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            color: #1e88e5;
+            user-select: none;
+        }
+
+        .token-control:hover {
+            background: #1e88e5;
+            color: white;
+        }
+
+        .doctor-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .serial-letter {
+            background: #1e88e5;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .doctor-details {
+            flex: 1;
+        }
+
+        .delay-button {
+            background: #fff1f1;
+            color: #d32f2f;
+            border: 1px solid #ffcdd2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s;
+        }
+
+        .delay-button:hover {
+            background: #ffebee;
+            border-color: #ef5350;
+        }
+
+        .notification-container {
+            position: relative;
+            width: 90%;
+            max-width: 600px;
+            margin: 10px auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .notification {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .notification-close {
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.2em;
+            color: #ef5350;
+        }
+
+        .notification-close:hover {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Civil Hospital, Sangli</h1>
+        </div>
+
+        <div class="notification-container" id="notificationContainer"></div>
+
+        <div class="datetime" id="datetime"></div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>General Ward Patients</h3>
+                <div class="stat-number" id="general-ward">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>ICU Patients</h3>
+                <div class="stat-number" id="icu">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>No. of consulting patients</h3>
+                <div class="stat-number" id="discharged">0</div>
+            </div>
+            <div class="stat-card">
+                <h3>Current Token No.</h3>
+                <div class="stat-number" id="current-token">-</div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="action-button" onclick="showModal('addDoctor')">Add Doctor</button>
+            <button class="action-button" onclick="showModal('addPatient')">Admit Patient</button>
+            <button class="action-button" onclick="showModal('dischargePatient')">Add Consulting Patient</button>
+            <button class="action-button" onclick="showModal('dischargeWardPatient')">Discharge Patient</button>
+            <button class="action-button" onclick="exportToCSV()">Export Patient Data</button>
+        </div>
+
+        <div class="doctors-list">
+            <h2>Doctor Statistics</h2>
+            <div id="doctors-list"></div>
+        </div>
+    </div>
+
+    <!-- Add Doctor Modal -->
+    <div id="addDoctorModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideModal('addDoctor')">&times;</span>
+            <h2>Add New Doctor</h2>
+            <div class="form-group">
+                <label for="doctorName">Doctor Name:</label>
+                <input type="text" id="doctorName" required>
+            </div>
+            <div class="form-group">
+                <label for="qualification">Qualification/Department:</label>
+                <input type="text" id="qualification" placeholder="e.g. MD Cardiology" required>
+            </div>
+            <div class="form-group">
+                <label>Visiting Hours:</label>
+                <div class="time-picker-container">
+                    <div class="time-picker">
+                        <input type="number" class="time-input" id="startHour" min="1" max="12" value="9">
+                        <span class="time-separator">:</span>
+                        <input type="number" class="time-input" id="startMinute" min="0" max="59" value="00" step="15">
+                        <select class="ampm-select" id="startAmPm">
+                            <option value="AM">AM</option>
+                            <option value="PM">PM</option>
+                        </select>
+                    </div>
+                    <span class="time-range-text">to</span>
+                    <div class="time-picker">
+                        <input type="number" class="time-input" id="endHour" min="1" max="12" value="5">
+                        <span class="time-separator">:</span>
+                        <input type="number" class="time-input" id="endMinute" min="0" max="59" value="00" step="15">
+                        <select class="ampm-select" id="endAmPm">
+                            <option value="AM">AM</option>
+                            <option value="PM" selected>PM</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="action-button" onclick="addDoctor()">Add Doctor</button>
+        </div>
+    </div>
+
+    <!-- Add Patient Modal -->
+    <div id="addPatientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideModal('addPatient')">&times;</span>
+            <h2>Admit New Patient</h2>
+            <div class="form-group">
+                <label for="patientName">Patient Name:</label>
+                <input type="text" id="patientName" required>
+            </div>
+            <div class="form-group">
+                <label for="admissionReason">Reason for Admission:</label>
+                <textarea id="admissionReason" rows="3" placeholder="Enter the cause/reason for admission" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="wardType">Ward Type:</label>
+                <select id="wardType" required>
+                    <option value="0">General Ward</option>
+                    <option value="1">ICU</option>
+                </select>
+            </div>
+            <button class="action-button" onclick="addPatient()">Admit Patient</button>
+        </div>
+    </div>
+
+    <!-- Add Consulting Patient Modal -->
+    <div id="dischargePatientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideModal('dischargePatient')">&times;</span>
+            <h2>Add Consulting Patient</h2>
+            <div class="form-group">
+                <label for="consultingPatientName">Patient Name:</label>
+                <input type="text" id="consultingPatientName" required>
+            </div>
+            <div class="form-group">
+                <label for="consultingDoctor">Select Doctor:</label>
+                <select id="consultingDoctor" required></select>
+            </div>
+            <button class="action-button" onclick="dischargePatient()">Add Consulting Patient</button>
+        </div>
+    </div>
+
+    <!-- Add Discharge Ward Patient Modal -->
+    <div id="dischargeWardPatientModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="hideModal('dischargeWardPatient')">&times;</span>
+            <h2>Discharge Patient</h2>
+            <div class="form-group">
+                <label for="wardPatientsList">Select Patient:</label>
+                <select id="wardPatientsList" required>
+                    <option value="">Select a patient</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dischargeNotes">Discharge Notes:</label>
+                <textarea id="dischargeNotes" rows="3" placeholder="Enter discharge notes (optional)"></textarea>
+            </div>
+            <button class="action-button" onclick="dischargeWardPatient()">Discharge Patient</button>
+        </div>
+    </div>
+
+    <div class="context-menu" id="doctorContextMenu">
+        <div class="context-menu-item" onclick="removeDoctor()">Remove Doctor</div>
+    </div>
+
+    <script>
+        // Initialize data with token tracking and serial letters
+        let doctors = JSON.parse(localStorage.getItem('doctors')) || [];
+        let patients = JSON.parse(localStorage.getItem('patients')) || [];
+        let selectedDoctorName = null;
+        let tokenNumbers = JSON.parse(localStorage.getItem('tokenNumbers')) || {};
+        let delays = JSON.parse(localStorage.getItem('delays')) || {};
+
+        // Function to get serial letter based on index
+        function getSerialLetter(index) {
+            return String.fromCharCode(65 + index); // A=65, B=66, etc.
+        }
+
+        // Update datetime
+        function updateDateTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            document.getElementById('datetime').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        // Update statistics
+        function updateStats() {
+            const generalWard = patients.filter(p => p.status === 0 && p.wardType === 0).length;
+            const icu = patients.filter(p => p.status === 0 && p.wardType === 1).length;
+            const consulting = patients.filter(p => p.status === 1).length;
+
+            document.getElementById('general-ward').textContent = generalWard;
+            document.getElementById('icu').textContent = icu;
+            document.getElementById('discharged').textContent = consulting;
+        }
+
+        // Context menu functions
+        document.addEventListener('click', function() {
+            document.getElementById('doctorContextMenu').style.display = 'none';
+        });
+
+        function showContextMenu(e, doctorName) {
+            e.preventDefault();
+            selectedDoctorName = doctorName;
+            const doctor = doctors.find(d => d.name === doctorName);
+            const contextMenu = document.getElementById('doctorContextMenu');
+            
+            // Update the menu item based on whether the doctor can be removed
+            const canRemove = doctor && doctor.patientCount === 0;
+            const menuItem = contextMenu.querySelector('.context-menu-item');
+            
+            if (canRemove) {
+                menuItem.style.display = 'block';
+                menuItem.onclick = removeDoctor;
+            } else {
+                menuItem.style.display = 'none';
+            }
+            
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e.pageX + 'px';
+            contextMenu.style.top = e.pageY + 'px';
+        }
+
+        function removeDoctor() {
+            if (selectedDoctorName) {
+                const doctor = doctors.find(d => d.name === selectedDoctorName);
+                
+                if (!doctor || doctor.patientCount > 0) {
+                    return; // Silently fail if doctor can't be removed
+                }
+
+                // Check if doctor has any consulting patients
+                const hasConsultingPatients = patients.some(patient => 
+                    patient.doctorName === selectedDoctorName && patient.status === 1
+                );
+
+                if (hasConsultingPatients) {
+                    return; // Silently fail if doctor has consulting patients
+                }
+
+                // Remove the doctor
+                doctors = doctors.filter(doctor => doctor.name !== selectedDoctorName);
+                localStorage.setItem('doctors', JSON.stringify(doctors));
+                updateDoctorsList();
+                document.getElementById('doctorContextMenu').style.display = 'none';
+            }
+        }
+
+        // Update doctors list
+        function updateDoctorsList() {
+            const doctorsList = document.getElementById('doctors-list');
+            doctorsList.innerHTML = `
+                <div class="doctors-header">
+                    <div class="doctor-info">Doctor Name</div>
+                    <div class="visiting-hours">Visiting Hours</div>
+                    <div style="text-align: center;">Report Delay</div>
+                    <div class="patient-count">Patients & Current Token</div>
+                </div>
+            `;
+
+            doctors.forEach((doctor, index) => {
+                const serialLetter = getSerialLetter(index);
+                const doctorTokens = tokenNumbers[doctor.name] || { current: 0 };
+                const doctorCard = document.createElement('div');
+                doctorCard.className = 'doctor-card';
+                doctorCard.oncontextmenu = (e) => showContextMenu(e, doctor.name);
+                doctorCard.innerHTML = `
+                    <div class="doctor-info">
+                        <div class="serial-letter">${serialLetter}</div>
+                        <div class="doctor-details">
+                            <h3>${doctor.name}</h3>
+                            <div class="doctor-qualification">${doctor.qualification || ''}</div>
+                        </div>
+                    </div>
+                    <div class="visiting-hours">
+                        ${doctor.visitingHours || 'Not specified'}
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="delay-button" onclick="reportDelay('${doctor.name}')">Report Delay</button>
+                    </div>
+                    <div class="patient-count">
+                        <div class="count-control" onclick="adjustPatientCount('${doctor.name}', -1)">-</div>
+                        <div class="count-number">
+                            ${doctor.patientCount} patients
+                            <div class="token-controls">
+                                <div class="token-number">
+                                    <span class="token-control" onclick="updateDoctorToken('${doctor.name}', -1)">-</span>
+                                    Token: ${serialLetter}${doctorTokens.current}
+                                    <span class="token-control" onclick="updateDoctorToken('${doctor.name}', 1)">+</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                doctorsList.appendChild(doctorCard);
+            });
+
+            // Show existing delays on page load
+            const currentTime = new Date().getTime();
+            for (const [doctorName, delay] of Object.entries(delays)) {
+                // Only show delays that are less than 1 hour old
+                if (currentTime - delay.timestamp < 3600000) {
+                    showDelayNotification(doctorName, delay.minutes);
+                }
+            }
+        }
+
+        function adjustPatientCount(doctorName, change) {
+            const doctor = doctors.find(d => d.name === doctorName);
+            if (doctor) {
+                // Prevent negative patient count
+                if (doctor.patientCount + change < 0) {
+                    return;
+                }
+
+                // Update doctor's patient count
+                doctor.patientCount += change;
+
+                // Add or remove a patient record based on the change
+                if (change > 0) {
+                    patients.push({
+                        name: "Patient " + Date.now(), // Unique identifier
+                        doctorName: doctorName,
+                        status: 1,
+                        admissionDate: new Date().toISOString()
+                    });
+                } else {
+                    // Remove the most recent patient for this doctor
+                    const index = patients.findLastIndex(p => 
+                        p.doctorName === doctorName && p.status === 1
+                    );
+                    if (index !== -1) {
+                        patients.splice(index, 1);
+                    }
+                }
+
+                // Update storage and UI
+                localStorage.setItem('doctors', JSON.stringify(doctors));
+                localStorage.setItem('patients', JSON.stringify(patients));
+                updateStats();
+                updateDoctorsList();
+            }
+        }
+
+        // Modal functions
+        function showModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            if (modal) {
+                modal.style.display = 'flex';
+                if (type === 'addPatient' || type === 'dischargePatient') {
+                    updateDoctorSelect();
+                } else if (type === 'dischargeWardPatient') {
+                    updateWardPatientsList();
+                }
+            }
+        }
+
+        function hideModal(type) {
+            const modal = document.getElementById(`${type}Modal`);
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Update select options
+        function updateDoctorSelect() {
+            const select = document.getElementById('consultingDoctor');
+            select.innerHTML = '';
+            doctors.forEach(doctor => {
+                const option = document.createElement('option');
+                option.value = doctor.name;
+                option.textContent = doctor.name;
+                select.appendChild(option);
+            });
+        }
+
+        // Update ward patients list in discharge modal
+        function updateWardPatientsList() {
+            const select = document.getElementById('wardPatientsList');
+            select.innerHTML = '<option value="">Select a patient</option>';
+            
+            patients.forEach((patient, index) => {
+                if (patient.status === 0) { // Only show admitted patients
+                    const option = document.createElement('option');
+                    option.value = index;
+                    const wardType = patient.wardType === 0 ? "General Ward" : "ICU";
+                    option.textContent = `${patient.name} (${wardType})`;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Discharge ward patient
+        function dischargeWardPatient() {
+            const patientIndex = document.getElementById('wardPatientsList').value;
+            const dischargeNotes = document.getElementById('dischargeNotes').value;
+            
+            if (!patientIndex) {
+                alert('Please select a patient to discharge');
+                return;
+            }
+
+            const patient = patients[patientIndex];
+            patient.status = 2; // 2 for discharged
+            patient.dischargeDate = new Date().toISOString();
+            patient.dischargeNotes = dischargeNotes;
+
+            localStorage.setItem('patients', JSON.stringify(patients));
+            updateStats();
+            hideModal('dischargeWardPatient');
+            
+            // Clear form
+            document.getElementById('dischargeNotes').value = '';
+            
+            alert(`Patient ${patient.name} has been discharged successfully`);
+        }
+
+        // Add these helper functions for time input validation
+        function padNumber(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        function validateTimeInput(input, min, max) {
+            let value = parseInt(input.value);
+            if (isNaN(value)) value = min;
+            if (value < min) value = min;
+            if (value > max) value = max;
+            input.value = padNumber(value);
+        }
+
+        // Add event listeners for time inputs
+        document.addEventListener('DOMContentLoaded', function() {
+            const timeInputs = {
+                startHour: [1, 12],
+                startMinute: [0, 59],
+                endHour: [1, 12],
+                endMinute: [0, 59]
+            };
+
+            for (const [id, [min, max]] of Object.entries(timeInputs)) {
+                const input = document.getElementById(id);
+                input.addEventListener('input', () => validateTimeInput(input, min, max));
+                input.addEventListener('blur', () => validateTimeInput(input, min, max));
+            }
+        });
+
+        // Update the addDoctor function to use the new time picker
+        function addDoctor() {
+            const name = document.getElementById('doctorName').value.trim();
+            const qualification = document.getElementById('qualification').value.trim();
+            
+            // Get time values
+            const startHour = padNumber(document.getElementById('startHour').value);
+            const startMinute = padNumber(document.getElementById('startMinute').value);
+            const startAmPm = document.getElementById('startAmPm').value;
+            const endHour = padNumber(document.getElementById('endHour').value);
+            const endMinute = padNumber(document.getElementById('endMinute').value);
+            const endAmPm = document.getElementById('endAmPm').value;
+            
+            const visitingHours = `${startHour}:${startMinute} ${startAmPm} - ${endHour}:${endMinute} ${endAmPm}`;
+            
+            if (!name || !qualification) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            doctors.push({
+                name: name,
+                qualification: qualification,
+                visitingHours: visitingHours,
+                patientCount: 0
+            });
+            
+            // Initialize token number for new doctor
+            tokenNumbers[name] = { current: 0 };
+            
+            localStorage.setItem('doctors', JSON.stringify(doctors));
+            localStorage.setItem('tokenNumbers', JSON.stringify(tokenNumbers));
+            updateDoctorsList();
+            updateTokenDisplay();
+            hideModal('addDoctor');
+            
+            // Clear form
+            document.getElementById('doctorName').value = '';
+            document.getElementById('qualification').value = '';
+            // Reset time inputs to default values
+            document.getElementById('startHour').value = '9';
+            document.getElementById('startMinute').value = '00';
+            document.getElementById('startAmPm').value = 'AM';
+            document.getElementById('endHour').value = '5';
+            document.getElementById('endMinute').value = '00';
+            document.getElementById('endAmPm').value = 'PM';
+        }
+
+        // Add patient
+        function addPatient() {
+            const name = document.getElementById('patientName').value.trim();
+            const reason = document.getElementById('admissionReason').value.trim();
+            const wardType = parseInt(document.getElementById('wardType').value);
+
+            if (!name || !reason) {
+                alert('Please enter both patient name and reason for admission');
+                return;
+            }
+
+            patients.push({
+                name: name,
+                wardType: wardType,
+                status: 0,
+                admissionReason: reason,
+                admissionDate: new Date().toISOString()
+            });
+
+            localStorage.setItem('patients', JSON.stringify(patients));
+            updateStats();
+            updateDoctorsList();
+            hideModal('addPatient');
+            
+            // Clear form
+            document.getElementById('patientName').value = '';
+            document.getElementById('admissionReason').value = '';
+        }
+
+        // Add consulting patient
+        function dischargePatient() {
+            const name = document.getElementById('consultingPatientName').value.trim();
+            const doctorName = document.getElementById('consultingDoctor').value;
+            
+            if (!name || !doctorName) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Update token numbers
+            if (!tokenNumbers[doctorName]) {
+                tokenNumbers[doctorName] = { current: 0 };
+            }
+            tokenNumbers[doctorName].current = tokenNumbers[doctorName].current;
+
+            patients.push({
+                name: name,
+                doctorName: doctorName,
+                status: 1,
+                tokenNumber: tokenNumbers[doctorName].current,
+                admissionDate: new Date().toISOString()
+            });
+
+            const doctor = doctors.find(d => d.name === doctorName);
+            if (doctor) {
+                doctor.patientCount++;
+                doctor.currentToken = tokenNumbers[doctorName].current;
+                localStorage.setItem('doctors', JSON.stringify(doctors));
+            }
+
+            localStorage.setItem('tokenNumbers', JSON.stringify(tokenNumbers));
+            localStorage.setItem('patients', JSON.stringify(patients));
+            updateStats();
+            updateDoctorsList();
+            updateTokenDisplay();
+            hideModal('dischargePatient');
+            document.getElementById('consultingPatientName').value = '';
+        }
+
+        // Export to CSV function
+        function exportToCSV() {
+            // Create CSV header
+            let csvContent = "Patient Name,Doctor Name,Ward Type,Status,Admission Date,Discharge Date,Admission Reason\n";
+            
+            // Add patient data
+            patients.forEach(patient => {
+                const wardType = patient.wardType === 0 ? "General Ward" : (patient.wardType === 1 ? "ICU" : "N/A");
+                const status = patient.status === 0 ? "Admitted" : (patient.status === 1 ? "Consulting" : "Discharged");
+                const doctorName = patient.doctorName || "Not Assigned";
+                const dischargeDate = patient.dischargeDate ? new Date(patient.dischargeDate).toLocaleString() : "Not Discharged";
+                const admissionReason = patient.admissionReason || "Not Specified";
+                
+                const row = [
+                    patient.name,
+                    doctorName,
+                    wardType,
+                    status,
+                    new Date(patient.admissionDate).toLocaleString(),
+                    dischargeDate,
+                    admissionReason
+                ].map(field => `"${field}"`).join(",");
+                csvContent += row + "\n";
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            
+            // Set up download
+            link.setAttribute("href", url);
+            link.setAttribute("download", `hospital_patients_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Update token display to show only letter-number combinations
+        function updateTokenDisplay() {
+            const currentTokenDisplay = document.getElementById('current-token');
+            let tokenDisplay = [];
+            
+            doctors.forEach((doctor, index) => {
+                const serialLetter = getSerialLetter(index);
+                const doctorTokens = tokenNumbers[doctor.name] || { current: 0 };
+                if (doctorTokens.current > 0) {
+                    tokenDisplay.push(`${serialLetter}${doctorTokens.current}`);
+                }
+            });
+            
+            currentTokenDisplay.textContent = tokenDisplay.length > 0 ? 
+                tokenDisplay.join(' | ') : '-';
+        }
+
+        // Function to update token number
+        function updateDoctorToken(doctorName, change) {
+            const doctor = doctors.find(d => d.name === doctorName);
+            if (doctor) {
+                if (!tokenNumbers[doctorName]) {
+                    tokenNumbers[doctorName] = { current: 0 };
+                }
+                
+                const newToken = tokenNumbers[doctorName].current + change;
+                if (newToken >= 0) {  // Prevent negative tokens
+                    tokenNumbers[doctorName].current = newToken;
+                    localStorage.setItem('tokenNumbers', JSON.stringify(tokenNumbers));
+                    updateDoctorsList();
+                    updateTokenDisplay();
+                }
+            }
+        }
+
+        // Function to report delay
+        function reportDelay(doctorName) {
+            const minutes = prompt("Enter delay duration in minutes:");
+            if (minutes === null) return; // User cancelled
+
+            const delay = parseInt(minutes);
+            if (isNaN(delay) || delay <= 0) {
+                alert("Please enter a valid number of minutes");
+                return;
+            }
+
+            delays[doctorName] = {
+                minutes: delay,
+                timestamp: new Date().getTime()
+            };
+
+            localStorage.setItem('delays', JSON.stringify(delays));
+            showDelayNotification(doctorName, delay);
+        }
+
+        // Function to show delay notification
+        function showDelayNotification(doctorName, minutes) {
+            const container = document.getElementById('notificationContainer');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerHTML = `
+                <span>Dr. ${doctorName}'s visiting hours are delayed by ${minutes} minutes</span>
+                <span class="notification-close" onclick="this.parentElement.remove()">&times;</span>
+            `;
+            container.appendChild(notification);
+
+            // Remove notification after 1 hour
+            setTimeout(() => {
+                notification.remove();
+            }, 3600000);
+        }
+
+        // Initialize
+        updateDateTime();
+        updateStats();
+        updateDoctorsList();
+        updateTokenDisplay();
+
+        // Update every second
+        setInterval(updateDateTime, 1000);
+    </script>
+</body>
+</html>
