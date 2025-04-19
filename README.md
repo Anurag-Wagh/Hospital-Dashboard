@@ -87,9 +87,7 @@ All data is stored locally in the browser's storage. No information is transmitt
 
 The dashboard can be easily customized by modifying the CSS styles or extending the JavaScript functionality to meet specific hospital requirements.
 
-## 📝 License
 
-This project is released under the MIT License.
 
 ---
 
