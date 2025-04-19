@@ -2,7 +2,7 @@
 
 ![Dashboard Preview](https://img.shields.io/badge/Status-Active-brightgreen)
 ![Version](https://img.shields.io/badge/Version-1.0-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+
 
 A modern, responsive web application for hospital management that helps track patients, doctors, and streamline daily hospital operations.
 
